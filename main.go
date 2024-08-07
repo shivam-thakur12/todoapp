@@ -9,6 +9,9 @@ import (
 	"strconv"
 
 	"github.com/BurntSushi/toml"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )
@@ -32,7 +35,7 @@ type Todo struct {
 	Status string `json:"status"`
 }
 
-// Initialize the database connection
+// Initialize the database connection and run migrations
 func initDB() {
 	var config Config
 
@@ -55,6 +58,26 @@ func initDB() {
 	}
 
 	fmt.Println("Database connected successfully!")
+
+	// Adjust connection string format for migrations
+	migrationConnStr := fmt.Sprintf("postgres://%s:%s@localhost/%s?sslmode=%s",
+		config.Database.User, config.Database.Password, config.Database.Dbname, config.Database.Sslmode)
+
+	// Run migrations
+	m, err := migrate.New(
+		"file://./db/migrations", // Source path to migration files
+		migrationConnStr)         // Connection string to the database
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = m.Up()
+	if err != nil && err != migrate.ErrNoChange {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Database migrated successfully!")
 }
 
 // Handle creating a new todo
