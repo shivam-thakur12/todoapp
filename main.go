@@ -27,9 +27,10 @@ type DatabaseConfig struct {
 var db *sql.DB
 
 type Todo struct {
-	ID     int    `json:"id"`
-	Title  string `json:"title"`
-	Status string `json:"status"`
+	ID        int     `json:"id"`
+	Title     string  `json:"title"`
+	Status    string  `json:"status"`
+	DeletedAt *string `json:"deleted_at,omitempty"` // Pointer to handle NULL values
 }
 
 // Initialize the database connection
@@ -79,7 +80,7 @@ func createTodo(w http.ResponseWriter, r *http.Request) {
 
 // Handle retrieving all todos
 func getTodos(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.Query("SELECT id, title, status FROM todos")
+	rows, err := db.Query("SELECT id, title, status FROM todos WHERE deleted_at IS NULL")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -145,7 +146,8 @@ func deleteTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := db.Exec("DELETE FROM todos WHERE id=$1", id)
+	// Set deleted_at to the current time
+	res, err := db.Exec("UPDATE todos SET deleted_at=NOW() WHERE id=$1", id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
