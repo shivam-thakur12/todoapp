@@ -13,6 +13,7 @@ require (
 
 require (
 	github.com/BurntSushi/toml v1.4.0
+	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/lib/pq v1.10.9
 	gotest.tools/v3 v3.5.1
