@@ -9,8 +9,6 @@ import (
 	"strconv"
 
 	"github.com/BurntSushi/toml"
-	"github.com/golang-migrate/migrate"
-	"github.com/golang-migrate/migrate/database/postgres"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )
@@ -57,25 +55,6 @@ func initDB() {
 	}
 
 	fmt.Println("Database connected successfully!")
-	// Run migrations
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	m, err := migrate.NewWithDatabaseInstance(
-		"file://db/migrations",
-		"postgres", driver)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = m.Up()
-	if err != nil && err != migrate.ErrNoChange {
-		log.Fatal(err)
-	}
-
-	fmt.Println("Migrations applied successfully!")
 }
 
 // Handle creating a new todo
