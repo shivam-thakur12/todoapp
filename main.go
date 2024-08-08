@@ -116,7 +116,7 @@ func updateTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := db.Exec("UPDATE todos SET title=$1, status=$2 WHERE id=$3", updatedTodo.Title, updatedTodo.Status, id)
+	res, err := db.Exec("UPDATE todos SET title=$1, status=$2 WHERE id=$3 AND deleted_at IS NULL", updatedTodo.Title, updatedTodo.Status, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -147,7 +147,7 @@ func deleteTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set deleted_at to the current time
-	res, err := db.Exec("UPDATE todos SET deleted_at=NOW() WHERE id=$1", id)
+	res, err := db.Exec("UPDATE todos SET deleted_at=NOW() WHERE id=$1 AND deleted_at IS NULL", id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
