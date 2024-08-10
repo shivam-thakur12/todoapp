@@ -16,7 +16,6 @@ type TodoService interface {
 	CreateTodoService(body io.Reader) (*Todo, error)
 	GetTodosService() ([]Todo, error)
 	UpdateTodoService(body io.Reader) (*Todo, error)
-	DeleteTodoService(body io.Reader) (int, error)
 	CreateTodoRepo(todo *Todo) error
 	GetTodosRepo() ([]Todo, error)
 	UpdateTodoRepo(todo *Todo) (int64, error)
@@ -55,15 +54,6 @@ func (s *todoService) UpdateTodoService(body io.Reader) (*Todo, error) {
 	}
 
 	return &updatedTodo, nil
-}
-
-// Service function for deleting a todo
-func (s *todoService) DeleteTodoService(body io.Reader) (int, error) {
-	var todo Todo
-	if err := json.NewDecoder(body).Decode(&todo); err != nil {
-		return 0, err
-	}
-	return todo.ID, nil
 }
 
 // Methods to call repo functions
