@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 )
 
@@ -15,11 +16,8 @@ type Todo struct {
 type TodoService interface {
 	CreateTodoService(body io.Reader) (*Todo, error)
 	GetTodosService() ([]Todo, error)
-	UpdateTodoService(body io.Reader) (*Todo, error)
-	CreateTodoRepo(todo *Todo) error
-	GetTodosRepo() ([]Todo, error)
-	UpdateTodoRepo(todo *Todo) (int64, error)
-	DeleteTodoRepo(id int) (int64, error)
+	UpdateTodoService(id int, body io.Reader) (*Todo, error)
+	DeleteTodoService(id int, body io.Reader) error
 }
 
 type todoService struct {
@@ -38,6 +36,10 @@ func (s *todoService) CreateTodoService(body io.Reader) (*Todo, error) {
 	if err := json.NewDecoder(body).Decode(&todo); err != nil {
 		return nil, err
 	}
+	err := s.Repo.CreateTodoRepo(&todo)
+	if err != nil {
+		return nil, err
+	}
 	return &todo, nil
 }
 
@@ -47,28 +49,38 @@ func (s *todoService) GetTodosService() ([]Todo, error) {
 }
 
 // Service function for updating a todo
-func (s *todoService) UpdateTodoService(body io.Reader) (*Todo, error) {
+func (s *todoService) UpdateTodoService(id int, body io.Reader) (*Todo, error) {
 	var updatedTodo Todo
 	if err := json.NewDecoder(body).Decode(&updatedTodo); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode request body: %w", err)
+	}
+	updatedTodo.ID = id
+	rowsAffected, err := s.Repo.UpdateTodoRepo(&updatedTodo)
+	if err != nil {
+		return nil, fmt.Errorf("database operation error: %w", err)
+
 	}
 
+	// If no rows were affected, it means the Todo with the given ID was not found
+	if rowsAffected == 0 {
+		return nil, fmt.Errorf("Todo not found")
+	}
+	// Check if the ID is provided
+	if updatedTodo.ID == 0 {
+		return nil, fmt.Errorf("Invalid ID")
+	}
 	return &updatedTodo, nil
 }
+func (s *todoService) DeleteTodoService(id int, body io.Reader) error {
 
-// Methods to call repo functions
-func (s *todoService) CreateTodoRepo(todo *Todo) error {
-	return s.Repo.CreateTodoRepo(todo)
-}
+	rowsAffected, err := s.Repo.DeleteTodoRepo(id)
+	if err != nil {
+		return fmt.Errorf("database operation error: %w", err)
+	}
 
-func (s *todoService) GetTodosRepo() ([]Todo, error) {
-	return s.Repo.GetTodosRepo()
-}
+	if rowsAffected == 0 {
+		return fmt.Errorf("Todo not found")
+	}
 
-func (s *todoService) UpdateTodoRepo(todo *Todo) (int64, error) {
-	return s.Repo.UpdateTodoRepo(todo)
-}
-
-func (s *todoService) DeleteTodoRepo(id int) (int64, error) {
-	return s.Repo.DeleteTodoRepo(id)
+	return err
 }
