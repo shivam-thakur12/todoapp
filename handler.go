@@ -3,17 +3,24 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
+type TodoHandler struct {
+	Service TodoService
+}
+
 // Handle creating a new todo
-func createTodo(w http.ResponseWriter, r *http.Request) {
-	todo, err := createTodoService(r)
+func (h *TodoHandler) createTodo(w http.ResponseWriter, r *http.Request) {
+	todo, err := h.Service.CreateTodoService(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	err = createTodoRepo(todo)
+	err = h.Service.CreateTodoRepo(todo)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -24,8 +31,8 @@ func createTodo(w http.ResponseWriter, r *http.Request) {
 }
 
 // Handle retrieving all todos
-func getTodos(w http.ResponseWriter, r *http.Request) {
-	todos, err := getTodosService()
+func (h *TodoHandler) getTodos(w http.ResponseWriter, r *http.Request) {
+	todos, err := h.Service.GetTodosService()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -35,15 +42,22 @@ func getTodos(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(todos)
 }
 
-// Handle updating a todo by ID
-func updateTodo(w http.ResponseWriter, r *http.Request) {
-	id, updatedTodo, err := updateTodoService(r)
+func (h *TodoHandler) updateTodo(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	updatedTodo, err := h.Service.UpdateTodoService(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	updatedTodo.ID = id // Ensure that the updatedTodo object has the correct ID
 
-	rowsAffected, err := updateTodoRepo(id, updatedTodo)
+	rowsAffected, err := h.Service.UpdateTodoRepo(updatedTodo)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -54,19 +68,19 @@ func updateTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedTodo.ID = id
 	json.NewEncoder(w).Encode(updatedTodo)
 }
 
 // Handle deleting a todo by ID
-func deleteTodo(w http.ResponseWriter, r *http.Request) {
-	id, err := deleteTodoService(r)
+func (h *TodoHandler) deleteTodo(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
 	}
 
-	rowsAffected, err := deleteTodoRepo(id)
+	rowsAffected, err := h.Service.DeleteTodoRepo(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

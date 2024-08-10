@@ -2,10 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"net/http"
-	"strconv"
-
-	"github.com/gorilla/mux"
+	"io"
 )
 
 type Todo struct {
@@ -15,46 +12,73 @@ type Todo struct {
 	DeletedAt *string `json:"deleted_at,omitempty"`
 }
 
+type TodoService interface {
+	CreateTodoService(body io.Reader) (*Todo, error)
+	GetTodosService() ([]Todo, error)
+	UpdateTodoService(body io.Reader) (*Todo, error)
+	DeleteTodoService(body io.Reader) (int, error)
+	CreateTodoRepo(todo *Todo) error
+	GetTodosRepo() ([]Todo, error)
+	UpdateTodoRepo(todo *Todo) (int64, error)
+	DeleteTodoRepo(id int) (int64, error)
+}
+
+type todoService struct {
+	Repo TodoRepository
+}
+
+func NewTodoService(repo TodoRepository) TodoService {
+	return &todoService{
+		Repo: repo,
+	}
+}
+
 // Service function for creating a todo
-func createTodoService(r *http.Request) (*Todo, error) {
+func (s *todoService) CreateTodoService(body io.Reader) (*Todo, error) {
 	var todo Todo
-	if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
+	if err := json.NewDecoder(body).Decode(&todo); err != nil {
 		return nil, err
 	}
 	return &todo, nil
 }
 
 // Service function for retrieving todos
-func getTodosService() ([]Todo, error) {
-	todos, err := getTodosRepo()
-	if err != nil {
-		return nil, err
-	}
-	return todos, nil
+func (s *todoService) GetTodosService() ([]Todo, error) {
+	return s.Repo.GetTodosRepo()
 }
 
 // Service function for updating a todo
-func updateTodoService(r *http.Request) (int, *Todo, error) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		return 0, nil, err
-	}
-
+func (s *todoService) UpdateTodoService(body io.Reader) (*Todo, error) {
 	var updatedTodo Todo
-	if err := json.NewDecoder(r.Body).Decode(&updatedTodo); err != nil {
-		return 0, nil, err
+	if err := json.NewDecoder(body).Decode(&updatedTodo); err != nil {
+		return nil, err
 	}
 
-	return id, &updatedTodo, nil
+	return &updatedTodo, nil
 }
 
 // Service function for deleting a todo
-func deleteTodoService(r *http.Request) (int, error) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
+func (s *todoService) DeleteTodoService(body io.Reader) (int, error) {
+	var todo Todo
+	if err := json.NewDecoder(body).Decode(&todo); err != nil {
 		return 0, err
 	}
-	return id, nil
+	return todo.ID, nil
+}
+
+// Methods to call repo functions
+func (s *todoService) CreateTodoRepo(todo *Todo) error {
+	return s.Repo.CreateTodoRepo(todo)
+}
+
+func (s *todoService) GetTodosRepo() ([]Todo, error) {
+	return s.Repo.GetTodosRepo()
+}
+
+func (s *todoService) UpdateTodoRepo(todo *Todo) (int64, error) {
+	return s.Repo.UpdateTodoRepo(todo)
+}
+
+func (s *todoService) DeleteTodoRepo(id int) (int64, error) {
+	return s.Repo.DeleteTodoRepo(id)
 }

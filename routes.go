@@ -4,14 +4,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func setupRoutes() *mux.Router {
+// setupRoutes configures and returns a new mux.Router with defined routes.
+func setupRoutes(handler *TodoHandler) *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/todo", createTodo).Methods("POST")
-	r.HandleFunc("/todo", getTodos).Methods("GET")
-	r.HandleFunc("/todo/{id}", updateTodo).Methods("PATCH")
-	r.HandleFunc("/todo/{id}", deleteTodo).Methods("DELETE")
+	r.HandleFunc("/todo", handler.createTodo).Methods("POST")
+	r.HandleFunc("/todo", handler.getTodos).Methods("GET")
+	r.HandleFunc("/todo/{id}", handler.updateTodo).Methods("PATCH")
+	r.HandleFunc("/todo/{id}", handler.deleteTodo).Methods("DELETE")
 
-	// // Start the HTTP server
-	// log.Fatal(http.ListenAndServe(":8080", r))
 	return r
 }
