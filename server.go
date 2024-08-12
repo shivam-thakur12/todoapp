@@ -14,36 +14,12 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-type Config struct {
-	Database   DatabaseConfig  `toml:"database"`
-	Migrations MigrationConfig `toml:"migrations"`
-	Redis      RedisConfig     `toml:"redis"`
-}
-
-type DatabaseConfig struct {
-	User     string `toml:"user"`
-	Password string `toml:"password"`
-	Dbname   string `toml:"dbname"`
-	Sslmode  string `toml:"sslmode"`
-}
-type MigrationConfig struct {
-	Path string `toml:"path"`
-}
-
-type RedisConfig struct {
-	Address  string `toml:"address"`
-	Password string `toml:"password"`
-	DB       int    `toml:"db"`
-	CacheKey string `toml:"cache_key"`
-}
-
 var db *sql.DB
 
 // Initialize the database connection
 func initDB(config Config) {
 
-	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s",
-		config.Database.User, config.Database.Password, config.Database.Dbname, config.Database.Sslmode)
+	connStr := initDBConfig(config)
 
 	var err error
 	db, err = sql.Open("postgres", connStr)
@@ -58,18 +34,17 @@ func initDB(config Config) {
 
 	fmt.Println("Database connected successfully!")
 
-	config.runMigrations()
+	runMigrations(config)
 }
 
-func (config Config) runMigrations() {
-	// Adjust connection string format for migrations
-	migrationConnStr := fmt.Sprintf("postgres://%s:%s@localhost/%s?sslmode=%s",
-		config.Database.User, config.Database.Password, config.Database.Dbname, config.Database.Sslmode)
+func runMigrations(config Config) {
+
+	migrationConnStr, migrationPath := initMigrationConfig(config)
 
 	// Run migrations
 	// Connection string to the database
 	m, err := migrate.New(
-		fmt.Sprintf("file://%s", config.Migrations.Path), // Source path to migration files from config
+		fmt.Sprintf("file://%s", migrationPath), // Source path to migration files from config
 		migrationConnStr)
 	if err != nil {
 		log.Fatal(err)
