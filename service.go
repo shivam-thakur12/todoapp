@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"time"
 )
 
 type Todo struct {
@@ -21,12 +22,14 @@ type TodoService interface {
 }
 
 type todoService struct {
-	Repo TodoRepository
+	Repo  TodoRepository
+	Cache RedisCache
 }
 
-func NewTodoService(repo TodoRepository) TodoService {
+func NewTodoService(repo TodoRepository, cache RedisCache) TodoService {
 	return &todoService{
-		Repo: repo,
+		Repo:  repo,
+		Cache: cache,
 	}
 }
 
@@ -40,12 +43,40 @@ func (s *todoService) CreateTodoService(body io.Reader) (*Todo, error) {
 	if err != nil {
 		return nil, err
 	}
+	s.Cache.Del("todos_list") // Invalidate cache
 	return &todo, nil
 }
 
 // Service function for retrieving todos
 func (s *todoService) GetTodosService() ([]Todo, error) {
-	return s.Repo.GetTodosRepo()
+	// Define a cache key for todos
+	cacheKey := "todos_list"
+
+	// Attempt to retrieve todos from Redis cache
+	cachedTodos, err := s.Cache.Get(cacheKey)
+	if err == nil && cachedTodos != "" {
+		var todos []Todo
+		// Deserialize JSON from cache into todos slice
+		if err := json.Unmarshal([]byte(cachedTodos), &todos); err == nil {
+			// fmt.Println("cache is working")
+			// Return the todos from cache
+			return todos, nil
+		}
+	}
+
+	// If cache miss or error, retrieve todos from database
+	todos, err := s.Repo.GetTodosRepo()
+	if err != nil {
+		return nil, fmt.Errorf("database operation error: %w", err)
+	}
+
+	// Serialize the todos into JSON and cache it in Redis for 10 minutes
+	todosJSON, err := json.Marshal(todos)
+	if err == nil {
+		s.Cache.Set(cacheKey, todosJSON, 10*time.Minute)
+		// fmt.Println("cache set is working")
+	}
+	return todos, nil
 }
 
 // Service function for updating a todo
@@ -69,6 +100,7 @@ func (s *todoService) UpdateTodoService(id int, body io.Reader) (*Todo, error) {
 	if updatedTodo.ID == 0 {
 		return nil, fmt.Errorf("Invalid ID")
 	}
+	s.Cache.Del("todos_list") // Invalidate cache
 	return &updatedTodo, nil
 }
 func (s *todoService) DeleteTodoService(id int, body io.Reader) error {
@@ -81,6 +113,6 @@ func (s *todoService) DeleteTodoService(id int, body io.Reader) error {
 	if rowsAffected == 0 {
 		return fmt.Errorf("Todo not found")
 	}
-
+	s.Cache.Del("todos_list") // Invalidate cache
 	return err
 }

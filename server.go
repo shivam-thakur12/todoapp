@@ -5,35 +5,42 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/BurntSushi/toml"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+
+	"context"
+
+	"github.com/go-redis/redis/v8"
 )
 
 type Config struct {
 	Database   DatabaseConfig  `toml:"database"`
 	Migrations MigrationConfig `toml:"migrations"`
+	Redis      RedisConfig     `toml:"redis"`
 }
-type MigrationConfig struct {
-	Path string `toml:"path"`
-}
+
 type DatabaseConfig struct {
 	User     string `toml:"user"`
 	Password string `toml:"password"`
 	Dbname   string `toml:"dbname"`
 	Sslmode  string `toml:"sslmode"`
 }
+type MigrationConfig struct {
+	Path string `toml:"path"`
+}
+
+type RedisConfig struct {
+	Address  string `toml:"address"`
+	Password string `toml:"password"`
+	DB       int    `toml:"db"`
+	CacheKey string `toml:"cache_key"`
+}
 
 var db *sql.DB
 
 // Initialize the database connection
-func initDB() {
-	var config Config
-
-	if _, err := toml.DecodeFile("config.toml", &config); err != nil {
-		log.Fatal(err)
-	}
+func initDB(config Config) {
 
 	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s",
 		config.Database.User, config.Database.Password, config.Database.Dbname, config.Database.Sslmode)
@@ -52,8 +59,8 @@ func initDB() {
 	fmt.Println("Database connected successfully!")
 
 	config.runMigrations()
-
 }
+
 func (config Config) runMigrations() {
 	// Adjust connection string format for migrations
 	migrationConnStr := fmt.Sprintf("postgres://%s:%s@localhost/%s?sslmode=%s",
@@ -74,4 +81,14 @@ func (config Config) runMigrations() {
 	}
 
 	fmt.Println("Database migrated successfully!")
+}
+
+var ctx = context.Background()
+
+func NewRedisClient(config Config) *redis.Client {
+	return redis.NewClient(&redis.Options{
+		Addr:     config.Redis.Address,
+		Password: config.Redis.Password,
+		DB:       config.Redis.DB,
+	})
 }
