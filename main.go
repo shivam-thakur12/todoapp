@@ -1,31 +1,39 @@
 package main
 
 import (
+	"TODO/pkg/config"
+	"TODO/pkg/handlers"
+	"TODO/pkg/redis"
+	"TODO/pkg/repo"
+	"TODO/pkg/routes"
+	"TODO/pkg/server"
+	"TODO/pkg/service"
+
 	"log"
 	"net/http"
 )
 
 func main() {
 	// Load the configuration
-	config := initConfig()
+	configg := config.InitConfig()
 
 	// Initialize the database
-	initDB(config) // Pass the config to the initDB function
-	defer db.Close()
+	server.InitDB(configg) // Pass the config to the initDB function
+	defer server.DB.Close()
 
 	// Initialize repository and service
-	repo := NewTodoRepository()
+	repo := repo.NewTodoRepository()
 	// Initialize Redis client
-	client := NewRedisClient(config)
-	cache := NewRedisCache(client)
+	client := server.NewRedisClient(configg)
+	cache := redis.NewRedisCache(client)
 
-	faktoryClient := initFaktory(config)
+	faktoryClient := server.InitFaktory(configg)
 
-	service := NewTodoService(repo, cache, faktoryClient)
-	handler := &TodoHandler{Service: service}
+	service := service.NewTodoService(repo, cache, faktoryClient)
+	handler := &handlers.TodoHandler{Service: service}
 
 	// Setup routes with initialized handler
-	r := setupRoutes(handler)
+	r := routes.SetupRoutes(handler)
 
 	// Start the HTTP server
 	log.Fatal(http.ListenAndServe(":8080", r))

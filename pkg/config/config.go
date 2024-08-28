@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"fmt"
@@ -36,7 +36,7 @@ type FaktoryConfig struct {
 	Password string `toml:"password"`
 }
 
-func initDBConfig(config Config) string {
+func InitDBConfig(config Config) string {
 
 	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s host=%s",
 		config.Database.User, config.Database.Password, config.Database.Dbname, config.Database.Sslmode, config.Database.Host)
@@ -44,14 +44,14 @@ func initDBConfig(config Config) string {
 
 }
 
-func initMigrationConfig(config Config) (string, string) {
+func InitMigrationConfig(config Config) (string, string) {
 	// Adjust connection string format for migrations
 	migrationConnStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
 		config.Database.User, config.Database.Password, config.Database.Host, config.Database.Dbname, config.Database.Sslmode)
 	return migrationConnStr, config.Migrations.Path
 }
 
-func initConfig() Config {
+func InitConfig() Config {
 	var config Config
 	if _, err := toml.DecodeFile("config.toml", &config); err != nil {
 		log.Fatal(err)
