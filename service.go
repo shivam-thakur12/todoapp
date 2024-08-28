@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"io"
 	"time"
+
+	"github.com/contribsys/faktory/client"
+	"github.com/google/uuid"
 )
 
 type Todo struct {
@@ -22,14 +25,16 @@ type TodoService interface {
 }
 
 type todoService struct {
-	Repo  TodoRepository
-	Cache RedisCache
+	Repo          TodoRepository
+	Cache         RedisCache
+	FaktoryClient *client.Client
 }
 
-func NewTodoService(repo TodoRepository, cache RedisCache) TodoService {
+func NewTodoService(repo TodoRepository, cache RedisCache, faktoryClient *client.Client) TodoService {
 	return &todoService{
-		Repo:  repo,
-		Cache: cache,
+		Repo:          repo,
+		Cache:         cache,
+		FaktoryClient: faktoryClient,
 	}
 }
 
@@ -99,17 +104,38 @@ func (s *todoService) UpdateTodoService(id int, body io.Reader) (*Todo, error) {
 }
 func (s *todoService) DeleteTodoService(id int, body io.Reader) error {
 
-	rowsAffected, err := s.Repo.DeleteTodoRepo(id)
-	if err != nil {
-		return fmt.Errorf("database operation error: %w", err)
+	// Generate a unique job ID
+	jid := uuid.NewString()
+
+	job := &client.Job{
+		Queue: "default",
+		Type:  "delete_todo",
+		Args:  []interface{}{map[string]interface{}{"id": id}},
+		Jid:   jid, // Set the unique JID
 	}
 
-	if rowsAffected == 0 {
-		return fmt.Errorf("Todo not found")
+	// Push job to Faktory
+	err := s.FaktoryClient.Push(job)
+	if err != nil {
+		return fmt.Errorf("failed to push job to Faktory: %w", err)
 	}
-	s.Cache.Del(CacheKeyTodosList) // Invalidate cache
-	return err
+
+	// Optionally invalidate cache if needed
+	s.Cache.Del(CacheKeyTodosList)
+	return nil
 }
+
+// rowsAffected, err := s.Repo.DeleteTodoRepo(id)
+// if err != nil {
+// 	return fmt.Errorf("database operation error: %w", err)
+// }
+
+// if rowsAffected == 0 {
+// 	return fmt.Errorf("Todo not found")
+// }
+// s.Cache.Del(CacheKeyTodosList) // Invalidate cache
+// return err
+// }
 
 // Service function to cache todos
 func (s *todoService) cacheTodos(todos []Todo, cacheKey string) error {
