@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 
+	"github.com/contribsys/faktory/client"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -15,6 +17,7 @@ import (
 )
 
 var db *sql.DB
+var faktoryClient *client.Client
 
 // Initialize the database connection
 func initDB(config Config) {
@@ -66,4 +69,14 @@ func NewRedisClient(config Config) *redis.Client {
 		Password: config.Redis.Password,
 		DB:       config.Redis.DB,
 	})
+}
+
+func initFaktory(config Config) *client.Client {
+	os.Setenv("FAKTORY_URL", config.Faktory.URL)
+	var err error
+	faktoryClient, err = client.Open()
+	if err != nil {
+		log.Fatalf("Error connecting to Faktory: %v", err)
+	}
+	return faktoryClient
 }

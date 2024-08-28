@@ -18,7 +18,10 @@ func main() {
 	// Initialize Redis client
 	client := NewRedisClient(config)
 	cache := NewRedisCache(client)
-	service := NewTodoService(repo, cache)
+
+	faktoryClient := initFaktory(config)
+
+	service := NewTodoService(repo, cache, faktoryClient)
 	handler := &TodoHandler{Service: service}
 
 	// Setup routes with initialized handler
