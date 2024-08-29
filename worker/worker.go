@@ -1,7 +1,7 @@
 package main
 
 import (
-	"TODO/pkg/server"
+	"TODO/todo/server"
 	"context"
 	"fmt"
 	"log"

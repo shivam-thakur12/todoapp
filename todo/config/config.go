@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"log"
+	"path/filepath"
 
 	"github.com/BurntSushi/toml"
 )
@@ -53,8 +54,16 @@ func InitMigrationConfig(config Config) (string, string) {
 
 func InitConfig() Config {
 	var config Config
-	if _, err := toml.DecodeFile("config.toml", &config); err != nil {
+
+	// Construct the path to the config.toml file in the root TODO directory
+	configPath, err := filepath.Abs("../config.toml")
+	if err != nil {
+		log.Fatalf("Error finding config file: %v", err)
+	}
+	// Decode the file into the config struct
+	if _, err := toml.DecodeFile(configPath, &config); err != nil {
 		log.Fatal(err)
 	}
+
 	return config
 }

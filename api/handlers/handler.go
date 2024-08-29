@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"TODO/pkg/service"
+	"TODO/todo/service"
 	"encoding/json"
 	"net/http"
 	"strconv"

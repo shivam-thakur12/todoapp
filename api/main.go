@@ -1,13 +1,15 @@
 package main
 
 import (
-	"TODO/pkg/config"
-	"TODO/pkg/handlers"
-	"TODO/pkg/redis"
-	"TODO/pkg/repo"
-	"TODO/pkg/routes"
-	"TODO/pkg/server"
-	"TODO/pkg/service"
+	"TODO/api/handlers"
+	"TODO/api/routes"
+	"TODO/todo/config"
+	"TODO/todo/redis"
+	"TODO/todo/repo"
+	"TODO/todo/server"
+	"TODO/todo/service"
+
+	// "TODO/todo/service"
 
 	"log"
 	"net/http"
@@ -19,6 +21,7 @@ func main() {
 
 	// Initialize the database
 	server.InitDB(configg) // Pass the config to the initDB function
+	server.RunMigrations(configg)
 	defer server.DB.Close()
 
 	// Initialize repository and service

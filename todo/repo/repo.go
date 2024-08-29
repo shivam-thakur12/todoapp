@@ -1,6 +1,6 @@
 package repo
 
-import "TODO/pkg/server"
+import "TODO/todo/server"
 
 type Todo struct {
 	ID        int     `json:"id"`

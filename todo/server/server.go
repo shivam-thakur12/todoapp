@@ -1,7 +1,7 @@
 package server
 
 import (
-	"TODO/pkg/config"
+	"TODO/todo/config"
 	"database/sql"
 	"fmt"
 	"log"
@@ -36,10 +36,9 @@ func InitDB(configg config.Config) {
 
 	fmt.Println("Database connected successfully!")
 
-	runMigrations(configg)
 }
 
-func runMigrations(configg config.Config) {
+func RunMigrations(configg config.Config) {
 
 	migrationConnStr, migrationPath := config.InitMigrationConfig(configg)
 

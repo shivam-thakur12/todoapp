@@ -1,8 +1,8 @@
 package main
 
 import (
-	"TODO/pkg/config"
-	"TODO/pkg/server"
+	"TODO/todo/config"
+	"TODO/todo/server"
 	"time"
 
 	worker "github.com/contribsys/faktory_worker_go"
