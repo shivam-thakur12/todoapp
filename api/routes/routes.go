@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"TODO/pkg/handlers"
+	"TODO/api/handlers"
 
 	"github.com/gorilla/mux"
 )

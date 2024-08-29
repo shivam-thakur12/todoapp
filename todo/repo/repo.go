@@ -3,8 +3,12 @@ package todo
 ========
 package repo
 
+<<<<<<< HEAD:pkg/repo/repo.go
 import "TODO/pkg/server"
 >>>>>>>> a07f97f (worker with refactoring code):pkg/repo/repo.go
+=======
+import "TODO/todo/server"
+>>>>>>> 8bb23e4 (more refactoring done.):todo/repo/repo.go
 
 type Todo struct {
 	ID        int     `json:"id"`

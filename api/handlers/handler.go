@@ -7,8 +7,12 @@ import (
 package handlers
 
 import (
+<<<<<<< HEAD:pkg/handlers/handler.go
 	"TODO/pkg/service"
 >>>>>>>> a07f97f (worker with refactoring code):pkg/handlers/handler.go
+=======
+	"TODO/todo/service"
+>>>>>>> 8bb23e4 (more refactoring done.):api/handlers/handler.go
 	"encoding/json"
 	"net/http"
 	"strconv"

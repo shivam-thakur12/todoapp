@@ -7,8 +7,12 @@ import (
 package server
 
 import (
+<<<<<<< HEAD:pkg/server/server.go
 	"TODO/pkg/config"
 >>>>>>>> a07f97f (worker with refactoring code):pkg/server/server.go
+=======
+	"TODO/todo/config"
+>>>>>>> 8bb23e4 (more refactoring done.):todo/server/server.go
 	"database/sql"
 	"fmt"
 	"log"
@@ -54,6 +58,7 @@ func InitDB(configg config.Config) {
 
 	fmt.Println("Database connected successfully!")
 
+<<<<<<< HEAD:pkg/server/server.go
 <<<<<<<< HEAD:todo/server.go
 }
 
@@ -64,6 +69,11 @@ func RunMigrations(configg config.Config) {
 
 func runMigrations(configg config.Config) {
 >>>>>>>> a07f97f (worker with refactoring code):pkg/server/server.go
+=======
+}
+
+func RunMigrations(configg config.Config) {
+>>>>>>> 8bb23e4 (more refactoring done.):todo/server/server.go
 
 	migrationConnStr, migrationPath := config.InitMigrationConfig(configg)
 
