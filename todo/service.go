@@ -1,4 +1,4 @@
-package main
+package todo
 
 import (
 	"encoding/json"
@@ -9,13 +9,6 @@ import (
 	"github.com/contribsys/faktory/client"
 	"github.com/google/uuid"
 )
-
-type Todo struct {
-	ID        int     `json:"id"`
-	Title     string  `json:"title"`
-	Status    string  `json:"status"`
-	DeletedAt *string `json:"deleted_at,omitempty"`
-}
 
 type TodoService interface {
 	CreateTodoService(body io.Reader) (*Todo, error)
@@ -95,10 +88,10 @@ func (s *todoService) UpdateTodoService(id int, body io.Reader) (*Todo, error) {
 	if rowsAffected == 0 {
 		return nil, fmt.Errorf("Todo not found")
 	}
-	// Check if the ID is provided
-	if updatedTodo.ID == 0 {
-		return nil, fmt.Errorf("Invalid ID")
-	}
+	// // Check if the ID is provided
+	// if updatedTodo.ID == 0 {
+	// 	return nil, fmt.Errorf("Invalid ID")
+	// }
 	s.Cache.Del(CacheKeyTodosList) // Invalidate cache
 	return &updatedTodo, nil
 }
@@ -125,18 +118,6 @@ func (s *todoService) DeleteTodoService(id int, body io.Reader) error {
 	return nil
 }
 
-// rowsAffected, err := s.Repo.DeleteTodoRepo(id)
-// if err != nil {
-// 	return fmt.Errorf("database operation error: %w", err)
-// }
-
-// if rowsAffected == 0 {
-// 	return fmt.Errorf("Todo not found")
-// }
-// s.Cache.Del(CacheKeyTodosList) // Invalidate cache
-// return err
-// }
-
 // Service function to cache todos
 func (s *todoService) cacheTodos(todos []Todo, cacheKey string) error {
 	// Serialize the todos into JSON
@@ -161,9 +142,9 @@ func (s *todoService) retrieveTodosFromCache(cacheKey string) ([]Todo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get cache from Redis: %w", err)
 	}
-	if cachedTodos == "" {
-		return nil, nil // Cache miss
-	}
+	// if cachedTodos == "" {
+	// 	return nil, nil // Cache miss
+	// }
 
 	var todos []Todo
 	// Deserialize JSON from cache into todos slice
