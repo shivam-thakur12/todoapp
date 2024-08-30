@@ -1,7 +1,6 @@
-package redis
+package main
 
 import (
-	"context"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -25,8 +24,6 @@ func NewRedisCache(client *redis.Client) RedisCache {
 		client: client,
 	}
 }
-
-var ctx = context.Background()
 
 // Set adds a key-value pair to the cache
 func (r *redisCache) Set(key string, value interface{}, expiration time.Duration) error {

@@ -1,9 +1,8 @@
-package config
+package main
 
 import (
 	"fmt"
 	"log"
-	"path/filepath"
 
 	"github.com/BurntSushi/toml"
 )
@@ -37,7 +36,7 @@ type FaktoryConfig struct {
 	Password string `toml:"password"`
 }
 
-func InitDBConfig(config Config) string {
+func initDBConfig(config Config) string {
 
 	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s host=%s",
 		config.Database.User, config.Database.Password, config.Database.Dbname, config.Database.Sslmode, config.Database.Host)
@@ -45,25 +44,17 @@ func InitDBConfig(config Config) string {
 
 }
 
-func InitMigrationConfig(config Config) (string, string) {
+func initMigrationConfig(config Config) (string, string) {
 	// Adjust connection string format for migrations
 	migrationConnStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
 		config.Database.User, config.Database.Password, config.Database.Host, config.Database.Dbname, config.Database.Sslmode)
 	return migrationConnStr, config.Migrations.Path
 }
 
-func InitConfig() Config {
+func initConfig() Config {
 	var config Config
-
-	// Construct the path to the config.toml file in the root TODO directory
-	configPath, err := filepath.Abs("../config.toml")
-	if err != nil {
-		log.Fatalf("Error finding config file: %v", err)
-	}
-	// Decode the file into the config struct
-	if _, err := toml.DecodeFile(configPath, &config); err != nil {
+	if _, err := toml.DecodeFile("config.toml", &config); err != nil {
 		log.Fatal(err)
 	}
-
 	return config
 }

@@ -1,7 +1,6 @@
-package server
+package main
 
 import (
-	"TODO/todo/config"
 	"database/sql"
 	"fmt"
 	"log"
@@ -12,35 +11,38 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 
+	"context"
+
 	"github.com/go-redis/redis/v8"
 )
 
-var DB *sql.DB
+var db *sql.DB
 var faktoryClient *client.Client
 
 // Initialize the database connection
-func InitDB(configg config.Config) {
+func initDB(config Config) {
 
-	connStr := config.InitDBConfig(configg)
+	connStr := initDBConfig(config)
 
 	var err error
-	DB, err = sql.Open("postgres", connStr)
+	db, err = sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = DB.Ping()
+	err = db.Ping()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	fmt.Println("Database connected successfully!")
 
+	runMigrations(config)
 }
 
-func RunMigrations(configg config.Config) {
+func runMigrations(config Config) {
 
-	migrationConnStr, migrationPath := config.InitMigrationConfig(configg)
+	migrationConnStr, migrationPath := initMigrationConfig(config)
 
 	// Run migrations
 	// Connection string to the database
@@ -59,16 +61,18 @@ func RunMigrations(configg config.Config) {
 	fmt.Println("Database migrated successfully!")
 }
 
-func NewRedisClient(configg config.Config) *redis.Client {
+var ctx = context.Background()
+
+func NewRedisClient(config Config) *redis.Client {
 	return redis.NewClient(&redis.Options{
-		Addr:     configg.Redis.Address,
-		Password: configg.Redis.Password,
-		DB:       configg.Redis.DB,
+		Addr:     config.Redis.Address,
+		Password: config.Redis.Password,
+		DB:       config.Redis.DB,
 	})
 }
 
-func InitFaktory(configg config.Config) *client.Client {
-	os.Setenv("FAKTORY_URL", configg.Faktory.URL)
+func initFaktory(config Config) *client.Client {
+	os.Setenv("FAKTORY_URL", config.Faktory.URL)
 	var err error
 	faktoryClient, err = client.Open()
 	if err != nil {
