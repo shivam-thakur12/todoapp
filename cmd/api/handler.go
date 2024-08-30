@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+<<<<<<<< HEAD:api/handlers/handler.go
+>>>>>>> 4fe2e1c (unit tests)
 <<<<<<<< HEAD:cmd/api/handler.go
 package api
 
@@ -7,8 +11,23 @@ import (
 package handlers
 
 import (
+<<<<<<< HEAD
 	"TODO/pkg/service"
 >>>>>>>> a07f97f (worker with refactoring code):pkg/handlers/handler.go
+=======
+<<<<<<< HEAD:pkg/handlers/handler.go
+	"TODO/pkg/service"
+>>>>>>>> a07f97f (worker with refactoring code):pkg/handlers/handler.go
+=======
+	"TODO/todo/service"
+>>>>>>> 8bb23e4 (more refactoring done.):api/handlers/handler.go
+========
+package api
+
+import (
+	"TODO/todo"
+>>>>>>>> 4fe2e1c (unit tests):cmd/api/handler.go
+>>>>>>> 4fe2e1c (unit tests)
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -17,11 +36,21 @@ import (
 )
 
 type TodoHandler struct {
+<<<<<<< HEAD
+=======
+<<<<<<<< HEAD:api/handlers/handler.go
+>>>>>>> 4fe2e1c (unit tests)
 <<<<<<<< HEAD:cmd/api/handler.go
 	Service todo.TodoService
 ========
 	Service service.TodoService
 >>>>>>>> a07f97f (worker with refactoring code):pkg/handlers/handler.go
+<<<<<<< HEAD
+=======
+========
+	Service todo.TodoService
+>>>>>>>> 4fe2e1c (unit tests):cmd/api/handler.go
+>>>>>>> 4fe2e1c (unit tests)
 }
 
 // Handle creating a new todo

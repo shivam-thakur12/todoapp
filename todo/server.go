@@ -1,4 +1,11 @@
+<<<<<<< HEAD
 <<<<<<<< HEAD:todo/server.go
+=======
+<<<<<<<< HEAD:todo/server/server.go
+<<<<<<<< HEAD:todo/server.go
+========
+>>>>>>>> 4fe2e1c (unit tests):todo/server.go
+>>>>>>> 4fe2e1c (unit tests)
 package todo
 
 import (
@@ -7,8 +14,17 @@ import (
 package server
 
 import (
+<<<<<<< HEAD
 	"TODO/pkg/config"
 >>>>>>>> a07f97f (worker with refactoring code):pkg/server/server.go
+=======
+<<<<<<< HEAD:pkg/server/server.go
+	"TODO/pkg/config"
+>>>>>>>> a07f97f (worker with refactoring code):pkg/server/server.go
+=======
+	"TODO/todo/config"
+>>>>>>> 8bb23e4 (more refactoring done.):todo/server/server.go
+>>>>>>> 4fe2e1c (unit tests)
 	"database/sql"
 	"fmt"
 	"log"
@@ -31,19 +47,35 @@ func InitDB(configg config.Config) {
 	connStr := config.InitDBConfig(configg)
 
 	var err error
+<<<<<<< HEAD
 <<<<<<<< HEAD:todo/server.go
+=======
+<<<<<<<< HEAD:todo/server/server.go
+<<<<<<<< HEAD:todo/server.go
+========
+>>>>>>>> 4fe2e1c (unit tests):todo/server.go
+>>>>>>> 4fe2e1c (unit tests)
 	DB, _ = sql.Open("postgres", connStr)
 	// if err != nil {
 	// 	log.Println("Failed to open database:", err)
 	// 	DB = nil // Ensure DB is set to nil on error
 	// 	return
 	// }
+<<<<<<< HEAD
+=======
+<<<<<<<< HEAD:todo/server/server.go
+>>>>>>> 4fe2e1c (unit tests)
 ========
 	DB, err = sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
 	}
 >>>>>>>> a07f97f (worker with refactoring code):pkg/server/server.go
+<<<<<<< HEAD
+=======
+========
+>>>>>>>> 4fe2e1c (unit tests):todo/server.go
+>>>>>>> 4fe2e1c (unit tests)
 
 	err = DB.Ping()
 	if err != nil {
@@ -54,6 +86,10 @@ func InitDB(configg config.Config) {
 
 	fmt.Println("Database connected successfully!")
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD:pkg/server/server.go
+>>>>>>> 4fe2e1c (unit tests)
 <<<<<<<< HEAD:todo/server.go
 }
 
@@ -64,6 +100,14 @@ func RunMigrations(configg config.Config) {
 
 func runMigrations(configg config.Config) {
 >>>>>>>> a07f97f (worker with refactoring code):pkg/server/server.go
+<<<<<<< HEAD
+=======
+=======
+}
+
+func RunMigrations(configg config.Config) {
+>>>>>>> 8bb23e4 (more refactoring done.):todo/server/server.go
+>>>>>>> 4fe2e1c (unit tests)
 
 	migrationConnStr, migrationPath := config.InitMigrationConfig(configg)
 
