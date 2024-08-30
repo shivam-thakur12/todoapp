@@ -1,4 +1,4 @@
-package constants
+package todo
 
 const (
 	CacheKeyTodosList = "todos_list"

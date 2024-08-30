@@ -1,13 +1,11 @@
-package routes
+package api
 
 import (
-	"TODO/api/handlers"
-
 	"github.com/gorilla/mux"
 )
 
 // setupRoutes configures and returns a new mux.Router with defined routes.
-func SetupRoutes(handler *handlers.TodoHandler) *mux.Router {
+func SetupRoutes(handler *TodoHandler) *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/todo", handler.Create).Methods("POST")
 	r.HandleFunc("/todo", handler.Get).Methods("GET")

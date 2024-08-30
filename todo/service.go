@@ -1,9 +1,6 @@
-package service
+package todo
 
 import (
-	"TODO/todo/constants"
-	"TODO/todo/redis"
-	"TODO/todo/repo"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -14,19 +11,19 @@ import (
 )
 
 type TodoService interface {
-	CreateTodoService(body io.Reader) (*repo.Todo, error)
-	GetTodosService() ([]repo.Todo, error)
-	UpdateTodoService(id int, body io.Reader) (*repo.Todo, error)
+	CreateTodoService(body io.Reader) (*Todo, error)
+	GetTodosService() ([]Todo, error)
+	UpdateTodoService(id int, body io.Reader) (*Todo, error)
 	DeleteTodoService(id int, body io.Reader) error
 }
 
 type todoService struct {
-	Repo          repo.TodoRepository
-	Cache         redis.RedisCache
+	Repo          TodoRepository
+	Cache         RedisCache
 	FaktoryClient *client.Client
 }
 
-func NewTodoService(repo repo.TodoRepository, cache redis.RedisCache, faktoryClient *client.Client) TodoService {
+func NewTodoService(repo TodoRepository, cache RedisCache, faktoryClient *client.Client) TodoService {
 	return &todoService{
 		Repo:          repo,
 		Cache:         cache,
@@ -35,8 +32,8 @@ func NewTodoService(repo repo.TodoRepository, cache redis.RedisCache, faktoryCli
 }
 
 // Service function for creating a todo
-func (s *todoService) CreateTodoService(body io.Reader) (*repo.Todo, error) {
-	var todo repo.Todo
+func (s *todoService) CreateTodoService(body io.Reader) (*Todo, error) {
+	var todo Todo
 	if err := json.NewDecoder(body).Decode(&todo); err != nil {
 		return nil, err
 	}
@@ -44,15 +41,15 @@ func (s *todoService) CreateTodoService(body io.Reader) (*repo.Todo, error) {
 	if err != nil {
 		return nil, err
 	}
-	s.Cache.Del(constants.CacheKeyTodosList) // Invalidate cache
+	s.Cache.Del(CacheKeyTodosList) // Invalidate cache
 	return &todo, nil
 }
 
 // Service function for retrieving todos
-func (s *todoService) GetTodosService() ([]repo.Todo, error) {
+func (s *todoService) GetTodosService() ([]Todo, error) {
 
 	// Attempt to retrieve todos from cache
-	todos, err := s.retrieveTodosFromCache(constants.CacheKeyTodosList)
+	todos, err := s.retrieveTodosFromCache(CacheKeyTodosList)
 	if err == nil && todos != nil {
 		// Return the todos from cache
 		return todos, nil
@@ -65,7 +62,7 @@ func (s *todoService) GetTodosService() ([]repo.Todo, error) {
 	}
 
 	// Cache the todos for future requests
-	err = s.cacheTodos(todos, constants.CacheKeyTodosList)
+	err = s.cacheTodos(todos, CacheKeyTodosList)
 	if err != nil {
 		// Optionally log the error but continue; you still return the data from DB
 		fmt.Printf("Warning: failed to cache todos: %v\n", err)
@@ -75,8 +72,8 @@ func (s *todoService) GetTodosService() ([]repo.Todo, error) {
 }
 
 // Service function for updating a todo
-func (s *todoService) UpdateTodoService(id int, body io.Reader) (*repo.Todo, error) {
-	var updatedTodo repo.Todo
+func (s *todoService) UpdateTodoService(id int, body io.Reader) (*Todo, error) {
+	var updatedTodo Todo
 	if err := json.NewDecoder(body).Decode(&updatedTodo); err != nil {
 		return nil, fmt.Errorf("failed to decode request body: %w", err)
 	}
@@ -91,11 +88,11 @@ func (s *todoService) UpdateTodoService(id int, body io.Reader) (*repo.Todo, err
 	if rowsAffected == 0 {
 		return nil, fmt.Errorf("Todo not found")
 	}
-	// Check if the ID is provided
-	if updatedTodo.ID == 0 {
-		return nil, fmt.Errorf("Invalid ID")
-	}
-	s.Cache.Del(constants.CacheKeyTodosList) // Invalidate cache
+	// // Check if the ID is provided
+	// if updatedTodo.ID == 0 {
+	// 	return nil, fmt.Errorf("Invalid ID")
+	// }
+	s.Cache.Del(CacheKeyTodosList) // Invalidate cache
 	return &updatedTodo, nil
 }
 func (s *todoService) DeleteTodoService(id int, body io.Reader) error {
@@ -117,12 +114,12 @@ func (s *todoService) DeleteTodoService(id int, body io.Reader) error {
 	}
 
 	// Optionally invalidate cache if needed
-	s.Cache.Del(constants.CacheKeyTodosList)
+	s.Cache.Del(CacheKeyTodosList)
 	return nil
 }
 
 // Service function to cache todos
-func (s *todoService) cacheTodos(todos []repo.Todo, cacheKey string) error {
+func (s *todoService) cacheTodos(todos []Todo, cacheKey string) error {
 	// Serialize the todos into JSON
 	todosJSON, err := json.Marshal(todos)
 	if err != nil {
@@ -139,17 +136,17 @@ func (s *todoService) cacheTodos(todos []repo.Todo, cacheKey string) error {
 }
 
 // Service function to retrieve todos from cache
-func (s *todoService) retrieveTodosFromCache(cacheKey string) ([]repo.Todo, error) {
+func (s *todoService) retrieveTodosFromCache(cacheKey string) ([]Todo, error) {
 	// Attempt to retrieve todos from Redis cache
 	cachedTodos, err := s.Cache.Get(cacheKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get cache from Redis: %w", err)
 	}
-	if cachedTodos == "" {
-		return nil, nil // Cache miss
-	}
+	// if cachedTodos == "" {
+	// 	return nil, nil // Cache miss
+	// }
 
-	var todos []repo.Todo
+	var todos []Todo
 	// Deserialize JSON from cache into todos slice
 	err = json.Unmarshal([]byte(cachedTodos), &todos)
 	if err != nil {

@@ -1,7 +1,7 @@
-package handlers
+package api
 
 import (
-	"TODO/todo/service"
+	"TODO/todo"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -10,7 +10,7 @@ import (
 )
 
 type TodoHandler struct {
-	Service service.TodoService
+	Service todo.TodoService
 }
 
 // Handle creating a new todo

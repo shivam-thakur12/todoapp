@@ -1,11 +1,12 @@
 package main
 
 import (
+	"TODO/consumer/worker"
+	"TODO/todo"
 	"TODO/todo/config"
-	"TODO/todo/server"
 	"time"
 
-	worker "github.com/contribsys/faktory_worker_go"
+	workerr "github.com/contribsys/faktory_worker_go"
 	_ "github.com/lib/pq"
 )
 
@@ -14,14 +15,14 @@ func main() {
 	configg := config.InitConfig()
 
 	// Initialize the database connection
-	server.InitDB(configg)
-	defer server.DB.Close()
+	todo.InitDB(configg)
+	defer todo.DB.Close()
 
 	// Initialize Faktory worker manager
-	mgr := worker.NewManager()
+	mgr := workerr.NewManager()
 
 	// Register the delete job
-	mgr.Register("delete_todo", deleteTodoWorker)
+	mgr.Register("delete_todo", worker.DeleteTodoWorker)
 
 	// Set concurrency and shutdown timeout
 	mgr.Concurrency = 1

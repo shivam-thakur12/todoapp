@@ -1,4 +1,4 @@
-package server
+package todo
 
 import (
 	"TODO/todo/config"
@@ -24,14 +24,18 @@ func InitDB(configg config.Config) {
 	connStr := config.InitDBConfig(configg)
 
 	var err error
-	DB, err = sql.Open("postgres", connStr)
-	if err != nil {
-		log.Fatal(err)
-	}
+	DB, _ = sql.Open("postgres", connStr)
+	// if err != nil {
+	// 	log.Println("Failed to open database:", err)
+	// 	DB = nil // Ensure DB is set to nil on error
+	// 	return
+	// }
 
 	err = DB.Ping()
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Failed to ping database:", err)
+		DB = nil // Ensure DB is set to nil on error
+		return
 	}
 
 	fmt.Println("Database connected successfully!")
@@ -48,12 +52,12 @@ func RunMigrations(configg config.Config) {
 		fmt.Sprintf("file://%s", migrationPath), // Source path to migration files from config
 		migrationConnStr)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to initialize migrations: %v", err)
 	}
 
 	err = m.Up()
 	if err != nil && err != migrate.ErrNoChange {
-		log.Fatal(err)
+		log.Fatalf("Failed to apply migrations: %v", err)
 	}
 
 	fmt.Println("Database migrated successfully!")
