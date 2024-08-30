@@ -1,7 +1,6 @@
-package handlers
+package main
 
 import (
-	"TODO/todo/service"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -10,11 +9,11 @@ import (
 )
 
 type TodoHandler struct {
-	Service service.TodoService
+	Service TodoService
 }
 
 // Handle creating a new todo
-func (h *TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
+func (h *TodoHandler) create(w http.ResponseWriter, r *http.Request) {
 	todo, err := h.Service.CreateTodoService(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -26,7 +25,7 @@ func (h *TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 // Handle retrieving all todos
-func (h *TodoHandler) Get(w http.ResponseWriter, r *http.Request) {
+func (h *TodoHandler) get(w http.ResponseWriter, r *http.Request) {
 	todos, err := h.Service.GetTodosService()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -37,7 +36,7 @@ func (h *TodoHandler) Get(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(todos)
 }
 
-func (h *TodoHandler) Update(w http.ResponseWriter, r *http.Request) {
+func (h *TodoHandler) update(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
@@ -56,7 +55,7 @@ func (h *TodoHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 // Handle deleting a todo by ID
-func (h *TodoHandler) Delete(w http.ResponseWriter, r *http.Request) {
+func (h *TodoHandler) delete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {

@@ -1,13 +1,4 @@
-package repo
-
-import "TODO/todo/server"
-
-type Todo struct {
-	ID        int     `json:"id"`
-	Title     string  `json:"title"`
-	Status    string  `json:"status"`
-	DeletedAt *string `json:"deleted_at,omitempty"`
-}
+package main
 
 type TodoRepository interface {
 	CreateTodoRepo(todo *Todo) error
@@ -23,7 +14,7 @@ func NewTodoRepository() TodoRepository {
 }
 
 func (r *todoRepository) CreateTodoRepo(todo *Todo) error {
-	err := server.DB.QueryRow("INSERT INTO todos (title, status) VALUES ($1, $2) RETURNING id", todo.Title, todo.Status).Scan(&todo.ID)
+	err := db.QueryRow("INSERT INTO todos (title, status) VALUES ($1, $2) RETURNING id", todo.Title, todo.Status).Scan(&todo.ID)
 	if err != nil {
 		return err
 	}
@@ -32,7 +23,7 @@ func (r *todoRepository) CreateTodoRepo(todo *Todo) error {
 
 // Repository function for retrieving todos
 func (r *todoRepository) GetTodosRepo() ([]Todo, error) {
-	rows, err := server.DB.Query("SELECT id, title, status FROM todos WHERE deleted_at IS NULL")
+	rows, err := db.Query("SELECT id, title, status FROM todos WHERE deleted_at IS NULL")
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +43,7 @@ func (r *todoRepository) GetTodosRepo() ([]Todo, error) {
 
 // Repository function for updating a todo
 func (r *todoRepository) UpdateTodoRepo(todo *Todo) (int64, error) {
-	res, err := server.DB.Exec("UPDATE todos SET title=$1, status=$2 WHERE id=$3 AND deleted_at IS NULL", todo.Title, todo.Status, todo.ID)
+	res, err := db.Exec("UPDATE todos SET title=$1, status=$2 WHERE id=$3 AND deleted_at IS NULL", todo.Title, todo.Status, todo.ID)
 	if err != nil {
 		return 0, err
 	}
@@ -67,7 +58,7 @@ func (r *todoRepository) UpdateTodoRepo(todo *Todo) (int64, error) {
 
 // Repository function for deleting a todo
 func (r *todoRepository) DeleteTodoRepo(id int) (int64, error) {
-	res, err := server.DB.Exec("UPDATE todos SET deleted_at=NOW() WHERE id=$1 AND deleted_at IS NULL", id)
+	res, err := db.Exec("UPDATE todos SET deleted_at=NOW() WHERE id=$1 AND deleted_at IS NULL", id)
 	if err != nil {
 		return 0, err
 	}
