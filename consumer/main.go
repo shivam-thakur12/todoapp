@@ -4,6 +4,7 @@ import (
 	"TODO/consumer/worker"
 	"TODO/todo"
 	"TODO/todo/config"
+	"log"
 	"time"
 
 	workerr "github.com/contribsys/faktory_worker_go"
@@ -31,5 +32,8 @@ func main() {
 	mgr.ProcessStrictPriorityQueues("default")
 
 	// Start processing jobs
-	mgr.Run()
+	err := mgr.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
 }

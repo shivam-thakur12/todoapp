@@ -22,7 +22,11 @@ func (h *TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(todo)
+	err = json.NewEncoder(w).Encode(todo)
+	if err != nil {
+		http.Error(w, "Failed to encode JSON response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Handle retrieving all todos
@@ -34,7 +38,11 @@ func (h *TodoHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(todos)
+	err = json.NewEncoder(w).Encode(todos)
+	if err != nil {
+		http.Error(w, "Failed to encode JSON response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *TodoHandler) Update(w http.ResponseWriter, r *http.Request) {
@@ -52,7 +60,11 @@ func (h *TodoHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(updatedTodo)
+	err = json.NewEncoder(w).Encode(updatedTodo)
+	if err != nil {
+		http.Error(w, "Failed to encode JSON response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Handle deleting a todo by ID

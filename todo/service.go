@@ -41,7 +41,10 @@ func (s *todoService) CreateTodoService(body io.Reader) (*Todo, error) {
 	if err != nil {
 		return nil, err
 	}
-	s.Cache.Del(CacheKeyTodosList) // Invalidate cache
+	err = s.Cache.Del(CacheKeyTodosList) // Invalidate cache
+	if err != nil {
+		return nil, fmt.Errorf("error invalidating cache %v", err)
+	}
 	return &todo, nil
 }
 
@@ -92,7 +95,10 @@ func (s *todoService) UpdateTodoService(id int, body io.Reader) (*Todo, error) {
 	// if updatedTodo.ID == 0 {
 	// 	return nil, fmt.Errorf("Invalid ID")
 	// }
-	s.Cache.Del(CacheKeyTodosList) // Invalidate cache
+	err = s.Cache.Del(CacheKeyTodosList) // Invalidate cache
+	if err != nil {
+		return nil, fmt.Errorf("error invalidating cache %v", err)
+	}
 	return &updatedTodo, nil
 }
 func (s *todoService) DeleteTodoService(id int, body io.Reader) error {
@@ -114,7 +120,10 @@ func (s *todoService) DeleteTodoService(id int, body io.Reader) error {
 	}
 
 	// Optionally invalidate cache if needed
-	s.Cache.Del(CacheKeyTodosList)
+	err = s.Cache.Del(CacheKeyTodosList)
+	if err != nil {
+		return fmt.Errorf("error invalidating cache %v", err)
+	}
 	return nil
 }
 

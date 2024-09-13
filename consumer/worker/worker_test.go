@@ -59,8 +59,19 @@ func TestDeleteTodoWorker(t *testing.T) {
 	err := faktoryPush(mgr, job)
 	require.NoError(t, err, "Failed to push job to Faktory")
 
-	// Run the Faktory worker manager
-	go mgr.Run()
+	// Create a channel to capture any errors from mgr.Run()
+	errChan := make(chan error, 1)
+	// Run the Faktory worker manager in a goroutine and capture any errors
+	go func() {
+		errChan <- mgr.Run()
+	}()
+	// Check for any errors returned by mgr.Run()
+	select {
+	case err := <-errChan:
+		require.NoError(t, err, "Faktory manager encountered an error")
+	default:
+		// No errors encountered
+	}
 	// defer mgr.Shutdown() // Ensure the manager is shutdown after the test
 
 	// Wait for a short duration to allow job processing
