@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-faktory
+  labels:
+    app: todo-faktory
+spec:
+  replicas: 1  # Only one Faktory instance needed
+  selector:
+    matchLabels:
+      app: todo-faktory
+  template:
+    metadata:
+      labels:
+        app: todo-faktory
+    spec:
+      containers:
+      - name: todo-faktory
+        image: contribsys/faktory:1.5.0  # Use the Faktory image
+        ports:
+        - containerPort: 7419  # Faktory default port
+        env:
+        - name: FAKTORY_PASSWORD
+          value: ""  # Set Faktory password (optional)

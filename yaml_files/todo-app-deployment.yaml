@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-app
+  labels:
+    app: todo-app
+spec:
+  replicas: 2  # This defines how many instances (pods) of your app should run
+  selector:
+    matchLabels:
+      app: todo-app
+  template:
+    metadata:
+      labels:
+        app: todo-app
+    spec:
+      containers:
+      - name: todo-app
+        image: shivamthakur3/todoapp:latest  # Replace with your Docker image
+        command: ["./todoapp"]
+        ports:
+        - containerPort: 8080  # Assuming your app listens on port 8080
+        env:
+        - name: POSTGRES_HOST
+          value: "todo-postgres"  # Service name for Postgres
+        - name: POSTGRES_USER
+          value: "todoapp"
+        - name: POSTGRES_PASSWORD
+          value: "itstodo"
+        - name: POSTGRES_DB
+          value: "tododb"
+        - name: POSTGRES_SSLMODE
+          value: "disable"
+        - name: REDIS_HOST
+          value: "todo-redis"  # Service name for Redis
+        - name: FAKTORY_URL
+          value: "tcp://todo-faktory:7419"  # Service name and port for Faktory

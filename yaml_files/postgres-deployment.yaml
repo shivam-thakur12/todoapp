@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-postgres
+  labels:
+    app: todo-postgres
+spec:
+  replicas: 1  # Usually, only one instance is needed for Postgres
+  selector:
+    matchLabels:
+      app: todo-postgres
+  template:
+    metadata:
+      labels:
+        app: todo-postgres
+    spec:
+      containers:
+      - name: todo-postgres
+        image: postgres:13  # Using the official Postgres image
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          value: "todoapp"
+        - name: POSTGRES_PASSWORD
+          value: "itstodo"
+        - name: POSTGRES_DB
+          value: "tododb"
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data  # Default Postgres data directory
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc  # PVC created earlier

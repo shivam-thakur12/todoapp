@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-redis
+  labels:
+    app: todo-redis
+spec:
+  replicas: 1  # Usually, only one Redis instance is enough
+  selector:
+    matchLabels:
+      app: todo-redis
+  template:
+    metadata:
+      labels:
+        app: todo-redis
+    spec:
+      containers:
+      - name: todo-redis
+        image: redis:6  # Using the official Redis image
+        ports:
+        - containerPort: 6379  # Redis default port

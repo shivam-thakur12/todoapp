@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-worker
+  labels:
+    app: todo-worker
+spec:
+  replicas: 1  # Only need one worker for now
+  selector:
+    matchLabels:
+      app: todo-worker
+  template:
+    metadata:
+      labels:
+        app: todo-worker
+    spec:
+      containers:
+      - name: todo-worker
+        image: shivamthakur3/todoapp:latest  # Same Docker image, but running as worker
+        command: ["./workerapp"]  # This will run the worker instead of the app
+        env:
+        - name: POSTGRES_HOST
+          value: "todo-postgres"  # Service name for Postgres
+        - name: POSTGRES_USER
+          value: "todoapp"
+        - name: POSTGRES_PASSWORD
+          value: "itstodo"
+        - name: POSTGRES_DB
+          value: "tododb"
+        - name: POSTGRES_SSLMODE
+          value: "disable"
+        - name: FAKTORY_URL
+          value: "tcp://todo-faktory:7419"  # Faktory queue for job processing
