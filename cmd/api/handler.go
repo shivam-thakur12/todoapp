@@ -1,6 +1,7 @@
 package api
 
 import (
+	"TODO/prometheus"
 	"TODO/todo"
 	"encoding/json"
 	"net/http"
@@ -27,6 +28,7 @@ func (h *TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to encode JSON response", http.StatusInternalServerError)
 		return
 	}
+	prometheus.CREATE_REQUEST_COUNT.Inc()
 }
 
 // Handle retrieving all todos
@@ -43,6 +45,7 @@ func (h *TodoHandler) Get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to encode JSON response", http.StatusInternalServerError)
 		return
 	}
+	prometheus.GET_REQUEST_COUNT.Inc()
 }
 
 func (h *TodoHandler) Update(w http.ResponseWriter, r *http.Request) {
@@ -65,6 +68,7 @@ func (h *TodoHandler) Update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to encode JSON response", http.StatusInternalServerError)
 		return
 	}
+	prometheus.PATCH_REQUEST_COUNT.Inc()
 }
 
 // Handle deleting a todo by ID
@@ -82,4 +86,5 @@ func (h *TodoHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+	prometheus.DELETE_REQUEST_COUNT.Inc()
 }
